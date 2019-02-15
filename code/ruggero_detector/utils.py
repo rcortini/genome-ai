@@ -14,9 +14,9 @@ def decode_sentence(sentence_n, n_to_alpha) :
     return ''.join([n_to_alpha[sentence_n[i]] for i in range(len(sentence_n))])
 
 # let's then build a function that can generate a random sequence with or
-# without a target sequence (Ruggero)
+# without a easter_egg sequence (Ruggero)
 def generate_sentences(nsentences, sentence_length, alpha_to_n,
-                       seed = None, with_target = False, target = 'ruggero', noise = None) :
+                       seed = None, easter_egg = 'ruggero', noise = None) :
     
     # get length of the alphabet
     nletters = len(alpha_to_n)
@@ -28,26 +28,27 @@ def generate_sentences(nsentences, sentence_length, alpha_to_n,
     # generate the sentences
     sentences = np.random.randint(low=0, high=nletters, size=(nsentences, sentence_length))
     
-    # if the user doesn't require the sentences to include the target, we're done,
-    # otherwise we have to include the target at some location
-    if with_target :
+    # if the user doesn't require the sentences to include the easter_egg, we're done,
+    # otherwise we have to include the easter_egg at some location
+    if easter_egg is not None :
         
-        # get the encoding of the target
-        target_encoding = encode_sentence(target, alpha_to_n)
+        # get the encoding of the easter_egg
+        easter_egg_encoding = encode_sentence(easter_egg, alpha_to_n)
         
         # generate a list of integers that will specify at which location in the sentence
-        # the target will be inserted
-        target_length = len(target)
-        target_location = np.random.randint(low=0, high=sentence_length-target_length+1,
+        # the easter_egg will be inserted
+        easter_egg_length = len(easter_egg)
+        easter_egg_location = np.random.randint(low=0,
+                                                high=sentence_length-easter_egg_length+1,
                                            size=nsentences)
-        for i, loc in enumerate(target_location) :
-            sentences[i, loc:loc+target_length] = target_encoding
+        for i, loc in enumerate(easter_egg_location) :
+            sentences[i, loc:loc+easter_egg_length] = easter_egg_encoding
         
         # now for the noise part: if user requested noise, then we add it
         if noise is not None :
             
             # first, in this case we generate a list of integers that represent
-            # the numbers of letters of the target that we want to mutate. This
+            # the numbers of letters of the easter_egg that we want to mutate. This
             # will be drawn from a uniform distribution between 0 and noise, where
             # noise is passed by the user
             mutation_size = np.random.randint(low = 0, high = noise, size=nsentences)
@@ -55,14 +56,14 @@ def generate_sentences(nsentences, sentence_length, alpha_to_n,
             # we the proceed to the mutation
             for i in range(nsentences) :
                 
-                # we remember where was the target in this sentence
-                loc = target_location[i]
+                # we remember where was the easter_egg in this sentence
+                loc = easter_egg_location[i]
                 
                 # we get the number of letters to mutate
                 n = mutation_size[i]
                 
-                # we pick n letters at random in the target
-                mutation_locations = np.random.randint(low=0, high=target_length, size=n)
+                # we pick n letters at random in the easter_egg
+                mutation_locations = np.random.randint(low=0, high=easter_egg_length, size=n)
                 mutations = np.random.randint(low=0, high=nletters, size=n)
                 
                 # we then do the mutation
@@ -85,14 +86,14 @@ def shuffle_data(data, targets) :
 def prepare_data(sentence_length, ntrain, nvalid, ntest, alpha_to_n, noise=None) :
     N = ntrain + nvalid + ntest
     
-    # generate N sentences without the target
+    # generate N sentences without the easter_egg
     sentences_without = generate_sentences(N, sentence_length, alpha_to_n,
-                                           with_target = False)
+                                           easter_egg = None)
     targets_without = np.zeros(N, dtype=np.int32)
     
-    # generate N sentences with the target
+    # generate N sentences with the easter_egg
     sentences_with = generate_sentences(N, sentence_length, alpha_to_n,
-                                           with_target = True, noise = noise)
+                                           easter_egg = 'ruggero', noise = noise)
     targets_with = np.ones(N, dtype=np.int32)
     
     # now stack everything and shuffle
