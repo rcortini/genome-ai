@@ -3,3 +3,5 @@ data
 scratch
 bin
 *pycache*
+code/randlines/randlines
+code/seqencode/seqencode
